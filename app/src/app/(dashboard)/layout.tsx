@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { ProjectContext } from '@/lib/project-context';
 
 interface User {
   id: string;
@@ -165,23 +166,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
     </div>
   );
-}
-
-// Project Context
-import { createContext, useContext } from 'react';
-
-interface ProjectContextType {
-  projectId: string;
-  projects: Project[];
-}
-
-export const ProjectContext = createContext<ProjectContextType>({
-  projectId: '',
-  projects: [],
-});
-
-export function useProject() {
-  return useContext(ProjectContext);
 }
 
 // Empty State Component

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useProject } from '../layout';
+import { useProject } from '@/lib/project-context';
 
 export default function SettingsPage() {
   const { projectId, projects } = useProject();

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useProject } from '../layout';
+import { useProject } from '@/lib/project-context';
 
 interface TimeseriesPoint {
   timestamp: string;
