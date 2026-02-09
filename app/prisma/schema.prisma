@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  name         String
+  passwordHash String    @map("password_hash")
+  role         String    @default("user")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  projects     Project[]
+
+  @@map("users")
+}
+
+model Project {
+  id          String     @id @default(uuid())
+  name        String
+  description String     @default("")
+  apiKey      String     @unique @map("api_key")
+  userId      String     @map("user_id")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events      ApiEvent[]
+  alerts      Alert[]
+  dashboards  Dashboard[]
+
+  @@index([userId])
+  @@map("projects")
+}
+
+model ApiEvent {
+  id             String   @id @default(uuid())
+  projectId      String   @map("project_id")
+  method         String
+  path           String
+  statusCode     Int      @map("status_code")
+  responseTimeMs Int      @map("response_time_ms")
+  requestSize    Int      @default(0) @map("request_size")
+  responseSize   Int      @default(0) @map("response_size")
+  ipAddress      String   @default("") @map("ip_address")
+  userAgent      String   @default("") @map("user_agent")
+  timestamp      DateTime @default(now())
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([timestamp])
+  @@index([projectId, timestamp])
+  @@index([projectId, path])
+  @@map("api_events")
+}
+
+model Alert {
+  id            String       @id @default(uuid())
+  projectId     String       @map("project_id")
+  name          String
+  conditionType String       @map("condition_type")
+  threshold     Float
+  isActive      Boolean      @default(true) @map("is_active")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  project       Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  alertEvents   AlertEvent[]
+
+  @@index([projectId])
+  @@map("alerts")
+}
+
+model AlertEvent {
+  id          String   @id @default(uuid())
+  alertId     String   @map("alert_id")
+  message     String
+  severity    String   @default("warning")
+  resolved    Boolean  @default(false)
+  triggeredAt DateTime @default(now()) @map("triggered_at")
+  alert       Alert    @relation(fields: [alertId], references: [id], onDelete: Cascade)
+
+  @@index([alertId])
+  @@map("alert_events")
+}
+
+model Dashboard {
+  id        String   @id @default(uuid())
+  projectId String   @map("project_id")
+  name      String
+  config    String   @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("dashboards")
+}
